@@ -1,0 +1,126 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const { sendVerificationEmail } = require('../emailService'); // Import email service
+
+const router = express.Router();
+
+// Signup Route
+router.post('/signup', async (req, res) => {
+    const { firstName, lastName, email, password, phoneNumber } = req.body;
+
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+
+    if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNumber,
+        isVerified: false, // Set user as not verified
+    });
+
+    try {
+        await newUser.save();
+
+        // Generate a token for email verification
+        const verificationToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        // Send the email verification link
+        await sendVerificationEmail(email, verificationToken);
+
+        res.status(201).json({ message: 'User created successfully. Please check your email for verification.' });
+    } catch (error) {
+        if (error.code === 11000) { // Duplicate key error
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+        res.status(500).json({ message: 'Error creating user', error });
+    }
+});
+
+// Verify email route
+router.get('/verify', async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid token or user not found' });
+        }
+
+        user.isVerified = true; // Mark user as verified
+        await user.save();
+
+        res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
+    } catch (error) {
+        res.status(400).json({ message: 'Invalid or expired token' });
+    }
+});
+
+// Login Route
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check if the user has verified their email
+    if (!user.isVerified) {
+        return res.status(403).json({ message: 'Please verify your email before logging in.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
+
+    console.log(`User logged in: ${user.firstName} ${user.lastName}`);
+
+    res.status(200).json({
+        message: 'Login successful',
+        token,
+        user: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
+        }
+    });
+});
+
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+};
+
+router.get('/profile', authenticateToken, (req, res) => {
+    res.status(200).json({ message: 'Profile data', userId: req.user.id });
+});
+
+module.exports = router;
