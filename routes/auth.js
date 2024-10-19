@@ -44,7 +44,7 @@ router.post('/signup', async (req, res) => {
         const verificationToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         const subject = 'Verify Your Email';
-        const message = `Please click the following link to verify your email: http://localhost:3000/api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
+        const message = `Please click the following link to verify your email: https://vendor-s-project.vercel.app//api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
 
         await sendEmail({ email: newUser.email, subject, message });
 
@@ -74,7 +74,7 @@ router.get('/verify', async (req, res) => {
         user.isVerified = true; 
         await user.save();
 
-        return res.redirect(`http://localhost:5173/home?message=${encodeURIComponent('Email verified successfully')}`);
+        return res.redirect(`https://vendor-s-project.vercel.app//home?message=${encodeURIComponent('Email verified successfully')}`);
     } catch (error) {
         console.error('Error during email verification:', error);
         res.status(500).json({ message: 'Server error during verification' });
@@ -100,7 +100,7 @@ router.post('/resend-verification', async (req, res) => {
         const verificationToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         const subject = 'Resend Verification Email';
-        const message = `Please click the following link to verify your email: http://localhost:3000/api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
+        const message = `Please click the following link to verify your email: https://vendor-s-project.vercel.app//api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
 
         await sendEmail({ email: user.email, subject, message });
 
