@@ -6,7 +6,10 @@ const User = require('../models/user');
 const { sendEmail } = require('../emailService'); 
 
 const router = express.Router();
-
+router.post('/signup', (req, res) => {
+    // Your signup logic
+    res.send('User signed up!');
+});
 // Sign up route
 router.post('/signup', async (req, res) => {
     const { firstName, lastName, email, password, phoneNumber } = req.body;
