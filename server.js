@@ -14,9 +14,13 @@ app.use(express.json());
 const cors = require('cors');
 
 app.use(cors({
-    origin: 'https://vendors-node.vercel.app',
+    origin: [
+        'https://vendors-node.vercel.app', 
+        'https://vendor-s-project.vercel.app', 
+        'http://localhost:3000'
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, 
+    credentials: true, // Allow credentials (if needed)
 }));
 
 
