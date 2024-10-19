@@ -13,14 +13,12 @@ const app = express();
 app.use(express.json());
 const cors = require('cors');
 
+const cors = require('cors');
+
 app.use(cors({
-    origin: [
-        'https://vendors-node.vercel.app', 
-        'https://vendor-s-project.vercel.app', 
-        'http://localhost:3000'
-    ],
+    origin: '*', // Allows all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, // Allow credentials (if needed)
+    credentials: false, // No credentials
 }));
 
 
