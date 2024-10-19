@@ -13,12 +13,7 @@ const app = express();
 app.use(express.json());
 const cors = require('cors');
 
-app.use(cors({
-    origin: 'https://vendor-s-project.vercel.app/', // Your frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, 
-}));
-
+app.use(cors());
 
 
 mongoose.connect(process.env.MONGO_URI,)
