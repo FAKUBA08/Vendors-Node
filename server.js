@@ -13,7 +13,11 @@ const app = express();
 app.use(express.json());
 const cors = require('cors');
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://vendors-node.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, 
+}));
 
 
 mongoose.connect(process.env.MONGO_URI,)
