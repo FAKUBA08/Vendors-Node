@@ -13,12 +13,8 @@ const app = express();
 app.use(express.json());
 const cors = require('cors');
 
-const cors = require('cors');
-
 app.use(cors({
     origin: '*', // Allows all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: false, // No credentials
 }));
 
 
