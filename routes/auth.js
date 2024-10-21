@@ -175,8 +175,8 @@ router.post('/forgot-password', async (req, res) => {
         user.resetPasswordExpire = Date.now() + 30 * 60 * 1000; 
 
         await user.save();
-const resetUrl = `https://vendors-node.onrender.com/reset-password/${resetToken}`;
-console.log('Reset URL:', resetUrl);
+        const resetUrl = `https://vendor-s-project.vercel.app/reset-password/${resetToken}`;
+        console.log('Reset URL:', resetUrl);
 
 const message = `You requested a password reset. Please click the link below to reset your password:\n${resetUrl}\nIf you did not request this, please ignore this email.`;
 
