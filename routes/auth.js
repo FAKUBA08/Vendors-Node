@@ -109,51 +109,57 @@
 
     // Login route
     router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-    const user = await User.findOne({ email });
-    if (!user) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
-
-    console.log(`User logged in: ${user.firstName} ${user.lastName}`);
-
-    res.status(200).json({
-    message: 'Login successful',
-    token,
-    user: {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    isVerified: user.isVerified
-    }
+        const { email, password } = req.body;
+    
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
+    
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
+    
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
+            
+            // Combine the response
+            res.status(200).json({
+                message: 'Login successful',
+                token,
+                user: {
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    isVerified: user.isVerified,
+                }
+            });
+    
+            console.log(`User logged in: ${user.firstName} ${user.lastName}`);
+        } catch (error) {
+            console.error('Error during login:', error);
+            res.status(500).json({ message: 'Server error' });
+        }
     });
-    } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).json({ message: 'Server error' });
-    }
-    });
+    
 
     // Middleware for token authentication
     const authenticateToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1]; 
-
-    if (!token) return res.sendStatus(401); 
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); 
-    req.user = user;
-    next();
-    });
+        const token = req.headers['authorization']?.split(' ')[1];
+    
+        if (!token) return res.sendStatus(401);
+    
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (err) {
+                console.error('Token verification error:', err);
+                return res.sendStatus(403);
+            }
+            req.user = user;
+            next();
+        });
     };
+    
 
     // Profile route
     router.get('/profile', authenticateToken, (req, res) => {
@@ -225,28 +231,38 @@
     res.status(500).json({ message: 'Server error' }); 
     }
     });
-// Save seller
-    router.post('/saveSeller', async (req, res) => {
-        const { userId, marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
-      
+    router.post('/saveSeller', authenticateToken, async (req, res) => {
+        const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
+        const userId = req.user.id; 
+    
+        console.log('User ID from token:', userId); // Log the user ID
+    
         try {
-          const user = await User.findById(userId);
-          if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-          }
-      
- 
-          user.seller = {
-            marketplaceName,
-            subdomain,
-            storeInformation,
-            storeAddress
-          };
-      
-          await user.save();
-          res.status(201).json({ message: 'Seller details saved successfully' });
+            const user = await User.findById(userId);
+            console.log('Fetched User:', user); // Log the user object
+            
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+    
+            if (!marketplaceName || !subdomain || !storeInformation || !storeAddress) {
+                return res.status(400).json({ message: 'All seller fields are required' });
+            }
+    
+            user.seller = {
+                marketplaceName,
+                subdomain,
+                storeInformation,
+                storeAddress,
+            };
+    
+            await user.save();
+            res.status(201).json({ message: 'Seller details saved successfully' });
         } catch (error) {
-          res.status(500).json({ message: 'Error saving seller details', error });
+            console.error('Error fetching user:', error); // More detailed error logging
+            res.status(500).json({ message: 'Error saving seller details', error: error.message });
         }
-      });
+    });
+    
+
     module.exports = router;
