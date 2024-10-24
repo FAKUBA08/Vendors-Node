@@ -123,12 +123,13 @@
             }
     
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
-            
+    
             // Combine the response
             res.status(200).json({
                 message: 'Login successful',
                 token,
                 user: {
+                    _id: user._id, // Add user ID to the response
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
@@ -231,24 +232,23 @@
     res.status(500).json({ message: 'Server error' }); 
     }
     });
+
+
     router.post('/saveSeller', authenticateToken, async (req, res) => {
         const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
         const userId = req.user.id; 
     
-        console.log('User ID from token:', userId); // Log the user ID
+        console.log('User ID from token:', userId); 
     
         try {
             const user = await User.findById(userId);
-            console.log('Fetched User:', user); // Log the user object
+            console.log('Fetched User:', user);
             
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
     
-            if (!marketplaceName || !subdomain || !storeInformation || !storeAddress) {
-                return res.status(400).json({ message: 'All seller fields are required' });
-            }
-    
+          
             user.seller = {
                 marketplaceName,
                 subdomain,
