@@ -236,19 +236,24 @@
 
     router.post('/saveSeller', authenticateToken, async (req, res) => {
         const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
-        const userId = req.user.id; 
-    
-        console.log('User ID from token:', userId); 
+        const userId = req.user?.id; // Safely access userId
+        
+        console.log('User ID from token:', userId); // Debug log
     
         try {
+            // Ensure userId exists before attempting to fetch
+            if (!userId) {
+                return res.status(401).json({ message: 'Unauthorized: User ID not found' });
+            }
+    
             const user = await User.findById(userId);
-            console.log('Fetched User:', user);
-            
+            console.log('Fetched User:', user); // Debug log
+    
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
     
-          
+            // Assign seller details to the user object
             user.seller = {
                 marketplaceName,
                 subdomain,
@@ -256,13 +261,15 @@
                 storeAddress,
             };
     
+            // Save the user document with seller details
             await user.save();
+            console.log('Seller details saved for user:', userId); // Success log
+    
             res.status(201).json({ message: 'Seller details saved successfully' });
         } catch (error) {
-            console.error('Error fetching user:', error); // More detailed error logging
+            console.error('Error saving seller details:', error); // Error logging
             res.status(500).json({ message: 'Error saving seller details', error: error.message });
         }
     });
     
-
     module.exports = router;
