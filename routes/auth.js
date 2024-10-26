@@ -256,10 +256,7 @@ console.log('Received store address:', storeAddress);
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-            if (error.code === 403) { // Duplicate key error
-                return res.status(400).json({ message: 'Session expired.Please Login again!.' });
-            
-                }
+      
             // Assign seller details to the user object
             user.seller = {
                 marketplaceName,
