@@ -4,6 +4,14 @@ const mongoose = require('mongoose');
 const sellerSchema = new mongoose.Schema({
   marketplaceName: { type: String, required: true },
   subdomain: { type: String, required: true ,unique:true},
+  storeInformation: { type: String},
+  storeAddress: {
+    country: { type: String},
+    state: { type: String},
+    city: { type: String},
+    street: { type: String },
+    zipCode: { type: String }
+  }
 }, { timestamps: true });
 
 
