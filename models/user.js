@@ -3,7 +3,15 @@ const mongoose = require('mongoose');
 // Define the Seller schema
 const sellerSchema = new mongoose.Schema({
   marketplaceName: { type: String, required: true },
-  subdomain: { type: String, required: true ,unique:true},
+  subdomain: { type: String, required: true, unique: true },
+  storeInformation: { type: String, required: true },
+  storeAddress: {
+    country: { type: String, required: true },
+    state: { type: String, required: true },
+    city: { type: String, required: true },
+    street: { type: String },
+    zipCode: { type: String }
+  }
 }, { timestamps: true });
 
 
