@@ -6,11 +6,7 @@ const sellerSchema = new mongoose.Schema({
   subdomain: { type: String, required: true ,unique:true},
   storeInformation: { type: String},
   storeAddress: {
-    country: { type: String},
-    state: { type: String},
-    city: { type: String},
-    street: { type: String },
-    zipCode: { type: String }
+    type: String
   }
 }, { timestamps: true });
 
