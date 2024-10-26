@@ -236,6 +236,10 @@
 
     router.post('/saveSeller', authenticateToken, async (req, res) => {
         const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
+        const { country, state, city} = storeAddress;
+
+// Logging each field to verify
+console.log('Received store address:', storeAddress);
         const userId = req.user?.id; // Safely access userId
         
         console.log('User ID from token:', userId); // Debug log
@@ -259,6 +263,9 @@
                 subdomain,
                 storeInformation,
                 storeAddress,
+                country,
+                state,
+                city
             };
     
             // Save the user document with seller details
