@@ -238,7 +238,6 @@
         const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
         const { country, state, city} = storeAddress;
 
-// Logging each field to verify
 console.log('Received store address:', storeAddress);
         const userId = req.user?.id; // Safely access userId
         
@@ -257,7 +256,7 @@ console.log('Received store address:', storeAddress);
                 return res.status(404).json({ message: 'User not found' });
             }
       
-            // Assign seller details to the user object
+ 
             user.seller = {
                 marketplaceName,
                 subdomain,
@@ -267,8 +266,11 @@ console.log('Received store address:', storeAddress);
                 state,
                 city
             };
-    
-            // Save the user document with seller details
+            const existingUser = await User.findOne({ subdomain });
+            if (existingUser) {
+            return res.status(400).json({ message: 'domain has already been taken' });
+            }
+
             await user.save();
             console.log('Seller details saved for user:', userId); // Success log
     
