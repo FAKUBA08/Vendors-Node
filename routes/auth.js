@@ -266,10 +266,7 @@ console.log('Received store address:', storeAddress);
                 state,
                 city
             };
-            if (error.code === 11000) {
-                return res.status(400).json({ message: 'Subdomain has already been taken' });
-            
-                }
+    
 
             await user.save();
             console.log('Seller details saved for user:', userId); // Success log
