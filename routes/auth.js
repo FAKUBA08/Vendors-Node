@@ -266,10 +266,10 @@ console.log('Received store address:', storeAddress);
                 state,
                 city
             };
-            const existingUser = await User.findOne({ subdomain });
-            if (existingUser) {
-            return res.status(400).json({ message: 'domain has already been taken' });
-            }
+            if (error.code === 11000) {
+                return res.status(400).json({ message: 'Subdomain has already been taken' });
+            
+                }
 
             await user.save();
             console.log('Seller details saved for user:', userId); // Success log
