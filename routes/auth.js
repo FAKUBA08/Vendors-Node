@@ -239,18 +239,17 @@
         const { country, state, city} = storeAddress;
 
 console.log('Received store address:', storeAddress);
-        const userId = req.user?.id; // Safely access userId
+        const userId = req.user?.id; 
         
-        console.log('User ID from token:', userId); // Debug log
+        console.log('User ID from token:', userId); 
     
         try {
-            // Ensure userId exists before attempting to fetch
             if (!userId) {
                 return res.status(401).json({ message: 'Unauthorized: User ID not found' });
             }
     
             const user = await User.findById(userId);
-            console.log('Fetched User:', user); // Debug log
+            console.log('Fetched User:', user); 
     
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
@@ -269,11 +268,13 @@ console.log('Received store address:', storeAddress);
     
 
             await user.save();
-            console.log('Seller details saved for user:', userId); // Success log
+            console.log('Seller details saved for user:', userId); 
     
-            res.status(201).json({ message: 'Seller details saved successfully' });
+            res.status(201).json({ message: 'Seller details saved successfully' ,
+                subdomain: user.seller.subdomain
+            });
         } catch (error) {
-            console.error('Error saving seller details:', error); // Error logging
+            console.error('Error saving seller details:', error); 
             res.status(500).json({ message: 'Error saving seller details', error: error.message });
         }
     });
