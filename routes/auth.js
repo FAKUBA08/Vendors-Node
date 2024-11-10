@@ -278,5 +278,17 @@ console.log('Received store address:', storeAddress);
             res.status(500).json({ message: 'Error saving seller details', error: error.message });
         }
     });
+    router.get('/subdomain', authenticateUser, async (req, res) => {
+        try {
+          const user = await User.findById(req.user.id);
+          if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+          res.json({ subdomain: user.subdomain });
+        } catch (err) {
+          res.status(500).json({ message: 'Server error' });
+        }
+      });
+      
     
     module.exports = router;
