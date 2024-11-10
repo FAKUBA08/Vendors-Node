@@ -47,7 +47,7 @@
     res.status(201).json({ message: 'User created successfully. Please check your email for verification.' });
     } catch (error) {
     console.error('Error creating user:', error);
-    if (error.code === 11000) { // Duplicate key error
+    if (error.code === 11000) { 
     return res.status(400).json({ message: 'The provided email address or phone number is already associated with an existing account.' });
 
     }
@@ -107,7 +107,7 @@
     }
     });
 
-    // Login route
+
     router.post('/login', async (req, res) => {
         const { email, password } = req.body;
     
@@ -124,15 +124,15 @@
     
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
     
-            // Combine the response
             res.status(200).json({
                 message: 'Login successful',
                 token,
                 user: {
-                    _id: user._id, // Add user ID to the response
+                    _id: user._id, 
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    subdomain: userSubdomain, 
                     isVerified: user.isVerified,
                 }
             });
@@ -285,6 +285,7 @@ console.log('Received store address:', storeAddress);
             return res.status(404).json({ message: 'User not found' });
           }
           res.json({ subdomain: user.subdomain });
+        console.log( user.subdomain )
         } catch (err) {
           res.status(500).json({ message: 'Server error' });
         }
