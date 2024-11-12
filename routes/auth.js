@@ -38,7 +38,7 @@
 
     await newUser.save();
 
-    const verificationToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const verificationToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
 
     const subject = 'Verify Your Email';
     const message = `Please click the following link to verify your email: https://vendors-node.onrender.com/api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
@@ -94,7 +94,7 @@
     return res.status(400).json({ message: 'User is already verified' });
     }
 
-    const verificationToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const verificationToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
 
     const subject = 'Resend Verification Email';
     const message = `Please click the following link to verify your email: https://vendors-node.onrender.com/api/auth/verify?token=${verificationToken}\nIf you did not sign up for this account, please ignore this email.`;
@@ -173,8 +173,27 @@
     
 
     // Profile route
-    router.get('/profile', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'Profile data', userId: req.user.id });
+    router.get('/profile', authenticateToken, async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id).select('email firstName lastName phoneNumber country state');
+    
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json({
+                message: 'Profile data',
+                userId: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phoneNumber: user.phoneNumber,
+                country: user.country,
+                state: user.state
+            });
+        } catch (error) {
+            console.error("Error retrieving profile:", error);
+            res.status(500).json({ message: 'Server error' });
+        }
     });
 
     // Forgot password route
