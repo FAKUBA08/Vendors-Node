@@ -33,6 +33,7 @@
     password: hashedPassword,
     phoneNumber,
     isVerified: false, 
+    setupComplete: false,
     });
 
     await newUser.save();
@@ -55,7 +56,7 @@
     }
     });
 
-    // Email verification route
+
     router.get('/verify', async (req, res) => {
     const { token } = req.query;
 
@@ -124,16 +125,16 @@
     
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30min' });
     
-            // Combine the response
             res.status(200).json({
                 message: 'Login successful',
                 token,
                 user: {
-                    _id: user._id, // Add user ID to the response
+                    _id: user._id, 
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
                     isVerified: user.isVerified,
+                    setupComplete: user.setupComplete,
                 }
             });
     
@@ -236,12 +237,10 @@
 
     router.post('/saveSeller', authenticateToken, async (req, res) => {
         const { marketplaceName, subdomain, storeInformation, storeAddress } = req.body;
-        const { country, state, city} = storeAddress;
-
-console.log('Received store address:', storeAddress);
-        const userId = req.user?.id; 
-        
-        console.log('User ID from token:', userId); 
+        const { country, state, city } = storeAddress;
+    
+        console.log('Received store address:', storeAddress);
+        const userId = req.user?.id;
     
         try {
             if (!userId) {
@@ -249,13 +248,10 @@ console.log('Received store address:', storeAddress);
             }
     
             const user = await User.findById(userId);
-            console.log('Fetched User:', user); 
-    
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-      
- 
+    
             user.seller = {
                 marketplaceName,
                 subdomain,
@@ -265,16 +261,49 @@ console.log('Received store address:', storeAddress);
                 state,
                 city
             };
-    
-
+            
+            user.setupComplete = true;
             await user.save();
-            console.log('Seller details saved for user:', userId); 
     
-            res.status(201).json({ message: 'Seller details saved successfully' });
+            res.status(201).json({ message: 'Seller details saved successfully', setupComplete: user.setupComplete });
         } catch (error) {
-            console.error('Error saving seller details:', error); 
+            console.error('Error saving seller details:', error);
             res.status(500).json({ message: 'Error saving seller details', error: error.message });
         }
     });
     
+    router.get('/setupComplete', authenticateToken, async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id);
+            
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+    
+            const setupComplete = !!user.seller; 
+            res.status(200).json({ setupComplete });
+        } catch (error) {
+            console.error('Error checking setup complete status:', error);
+            res.status(500).json({ message: 'Error checking setup complete status', error: error.message });
+        }
+    });
+
+
+
+    router.get('/subdomain', authenticateToken, async (req, res) => {
+        const userId = req.user?.id;
+    
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+    
+            const { subdomain } = user.seller || {};
+            res.status(200).json({ subdomain, setupComplete: user.setupComplete });
+        } catch (error) {
+            console.error('Error fetching subdomain:', error);
+            res.status(500).json({ message: 'Error fetching subdomain', error: error.message });
+        }
+    });
     module.exports = router;
