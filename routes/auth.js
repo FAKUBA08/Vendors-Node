@@ -195,7 +195,21 @@
             res.status(500).json({ message: 'Server error' });
         }
     });
+ 
 
+    router.put('/profile', authenticateToken, async (req, res) => {
+        try {
+          const { email, firstName, lastName, phoneNumber } = req.body;
+          const userId = req.user.id;
+      
+          const updatedUser = await User.updateOne({ _id: userId }, { email, firstName, lastName, phoneNumber });
+      
+          res.status(200).json({ message: 'Profile updated successfully', updatedUser });
+        } catch (error) {
+          res.status(500).json({ message: 'Failed to update profile' });
+        }
+      });
+      
     // Forgot password route
     router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
