@@ -148,19 +148,28 @@
 
     // Middleware for token authentication
     const authenticateToken = (req, res, next) => {
+      
         const token = req.headers['authorization']?.split(' ')[1];
     
         if (!token) return res.sendStatus(401);
     
+
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
                 console.error('Token verification error:', err);
+
+                if (err.name === 'TokenExpiredError') {
+                    return res.status(403).json({ message: 'Token expired. Please log in again.' });
+                }
+    
                 return res.sendStatus(403);
             }
+
             req.user = user;
             next();
         });
     };
+    
     
 
     // Profile route
