@@ -159,7 +159,7 @@
                 console.error('Token verification error:', err);
 
                 if (err.name === 'TokenExpiredError') {
-                    return res.status(403).json({ message: 'Token expired. Please log in again.' });
+                    return res.status(403).json({ message: `Token expired.https://vendor-s-project.vercel.app/reset-password/ Please log in again.` });
                 }
     
                 return res.sendStatus(403);
