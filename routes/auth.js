@@ -148,7 +148,7 @@
 
     // Middleware for token authentication
     const authenticateToken = (req, res, next) => {
-      
+        const clickResent=`https://vendor-s-project.vercel.app/login/`
         const token = req.headers['authorization']?.split(' ')[1];
     
         if (!token) return res.sendStatus(401);
@@ -159,7 +159,7 @@
                 console.error('Token verification error:', err);
 
                 if (err.name === 'TokenExpiredError') {
-                    return res.status(403).json({ message: `Token expired.https://vendor-s-project.vercel.app/reset-password/ Please log in again.` });
+                    return res.status(403).json({ message: `Token expired.${clickResent} Please log in again.` });
                 }
     
                 return res.sendStatus(403);
